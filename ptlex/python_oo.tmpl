@@ -81,14 +81,14 @@ __ACTIONS__
                 # end actions
                 
             FILE.close()
-        except IOError, (errno):
-            print "%s" % (errno)
+        except (IOError, (errno)):
+            print("%s" % (errno))
 
 __MAIN__
 
 lexer = __CLASSNAME__()
 def usage():
-    print  "Usage:  " + sys.argv[0] + " <filename|-> (- if you use stdin) "
+    print( "Usage:  " + sys.argv[0] + " <filename|-> (- if you use stdin) ")
 
 if(sys.argv.__len__() == 2):
     lexer.yylex(sys.argv[1])

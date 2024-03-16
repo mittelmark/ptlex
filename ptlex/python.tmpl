@@ -78,14 +78,14 @@ __MATCHES__
 __ACTIONS__
             # end actions
         FILE.close()
-    except IOError, (errno):
-        print "%s" % (errno)
+    except (IOError, (errno)):
+        print ("%s" % (errno))
 
 # begin main
 __MAIN__
 
 def usage():
-    print  "Usage:  " + sys.argv[0] + " <filename> "
+    print("Usage:  " + sys.argv[0] + " <filename> ")
 
 if(sys.argv.__len__() == 2):
     yylex(sys.argv[1])
