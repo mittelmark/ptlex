@@ -1,10 +1,10 @@
 %top{
 def dumpPosition(query_id,query_length,position) : 
-    print "insert into positions (query_id,query_length,position) values ('"+str(query_id)+"',"+str(query_length)+","+str(position)+");"
+    print("insert into positions (query_id,query_length,position) values ('"+str(query_id)+"',"+str(query_length)+","+str(position)+");")
     
 def dumpHit(query_id,hit_id,hit,score,evalue):
     hit += 1
-    print "insert into hits (query_id,hit_id,hit,score,evalue) values ('"+str(query_id)+"','"+str(hit_id)+"',"+str(hit)+","+str(score)+","+str(evalue)+");"
+    print("insert into hits (query_id,hit_id,hit,score,evalue) values ('"+str(query_id)+"','"+str(hit_id)+"',"+str(hit)+","+str(score)+","+str(evalue)+");")
     return hit    
 %top}
 
