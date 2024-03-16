@@ -1,0 +1,41 @@
+# !- python -!
+%top{
+nword = 0
+nchar = 0
+nline = 0
+%top}
+
+%{
+    global nword
+    global nchar
+    global nline
+%}
+
+%option buffersize=1024
+%%
+
+
+\n {
+    nline += 1
+    nchar += 1
+}
+
+[^ \t\n]+ {
+    nword += 1
+    nchar += yyleng
+}
+
+. {
+    nchar += 1
+}
+
+%%
+
+def usage():
+    print  "Usage:  " + sys.argv[0] + " <filename> "
+if(sys.argv.__len__() == 2):
+    yylex(sys.argv[1])
+    print " ",nline, " " , nword , " " , nchar , " " , sys.argv[1]
+
+else:
+    usage()

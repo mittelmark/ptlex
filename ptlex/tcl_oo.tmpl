@@ -1,0 +1,103 @@
+# end of TOP !- tcl -!
+package require Itcl
+__VERBATIM__
+itcl::class __CLASSNAME__ {
+__INIT__
+    protected {
+        variable yystate
+        variable yy_buffer
+        variable yyleng
+        variable buffer
+        variable yytext
+    }
+    constructor {args} {
+        eval configure $args
+        set yystate INITIAL
+        set yy_buffer ""
+        set yyleng 0
+        set buffer ""
+        set yytext ""
+
+    }
+
+
+    method BEGIN {state} {             
+        #begins with given state
+        set yystate $state
+    }
+
+    method unput {chrs} {              
+        #adds given characters to the beginning of the input stream
+        set buffer [string range $buffer 0 $yyleng]
+        append buffer "$chrs[string range $::buffer $yyleng]"
+    }
+
+    method yymore {} {             
+        #adds yytext at the beginning of the new matched text
+        set yy_buffer $yytext
+    }
+    
+    method yyless {num} {             
+        #writes $num last characters of $yytext back to input stream and modifies $yytext/$yyleng
+        set yytext [string range $yytext [expr {$yyleng-$num}]]
+        set yyleng [string length $yytext]
+        set buffer [string range $buffer 0 $yyleng]
+        append buffer $yytext 
+        append buffer [string range $buffer [expr {$yyleng+$num}]]
+    }
+    method yylex {filename} {
+__USERCODE__
+        # begin patterns
+        # dynamic part 1
+__REGEXES__
+        # end patterns
+        set yychar 0
+        set bsize __BSIZE__
+        set nbuff ""
+        set nchars 0 ;#?? required
+        set lbuffer "";   #lbuffer buffers length of longest matched regex
+        set yy_rule 0
+        if {$filename eq "-"} {
+            set yyin stdin
+        } else {
+            if [catch {open $filename r} yyin] {
+                puts stderr "Cannot open $filename: $infh"
+                exit
+            }
+        } 
+        set buffer [read $yyin $bsize]
+        while {1} {
+            set lbuffer 0
+            set yy_rule 0
+            incr yychar $yyleng 
+            set buffer [string range $buffer $yyleng end]
+            #if yyleng = 0 starts from beginning, else from yyleng till end
+            if {[string length $buffer] < $bsize} {
+                set nbuff [read $yyin $bsize] 
+                if {[string length $nbuff] == 0 && [string length $buffer] == 0} { 
+                    break 
+                } 
+                append buffer $nbuff 
+            }
+            # begin pattern testing
+            # rules setting
+            # dynamic part 2
+__MATCHES__
+            # end pattern testing
+            if {!$yy_rule} {
+                set yytext [string range $buffer 0 0]
+            }
+
+            set yyleng [string length $yytext]
+            set yytext "$yy_buffer$yytext"; #for yymore()
+            set yy_buffer ""
+            # begin actions
+            # dynamic part 3
+__ACTIONS__
+            # end actions
+        }
+        close $yyin
+    }
+}
+# begin main code
+__MAIN__

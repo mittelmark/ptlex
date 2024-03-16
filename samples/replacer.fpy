@@ -1,0 +1,9 @@
+%option buffersize=1024
+
+%%
+
+[a-z] { 
+    sys.stdout.write("x")
+}
+
+%%

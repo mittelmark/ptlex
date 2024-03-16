@@ -1,0 +1,87 @@
+# end of TOP !- ruby -!
+# global vars
+$yystate = "INITIAL"
+$yy_more = "" # yymore() buffer
+$bsize = 200
+$yyleng = 0 ;
+$buffer = "" ;
+$yytext = "" ;
+$yychar = 0
+__USERCODE__
+def yybegin (state) 
+    $yystate = state
+end
+        
+def unput (chrs)
+    $buffer = $buffer[0,$yyleng]
+    $buffer = $buffer+chrs+$buffer[$yyleng,$buffer.length-$yyleng]
+end
+def yymore ()
+    $yy_more = $yytext
+end
+def yyless (num)
+    $yytext = $yytext[$yyleng-num,$yytext.length]
+    $yyleng = num
+    $buffer = $buffer[0,$yyleng]+$yytext+$buffer[$yyleng+num,$buffer.length]
+end
+def yylex (filename) 
+__VERBATIM__
+__INIT__
+    # begin patterns
+    # dynamic part 1
+__REGEXES__
+    # end patterns
+    $yychar = 0
+    lbuffer = 0
+    yy_rule = 0
+    if (filename == "-") 
+        aFile = STDIN
+    else
+        aFile = File.new(filename,"r")
+    end
+    $buffer = aFile.read($bsize)
+    while true 
+        lbuffer = 0
+        yy_rule = 0
+        $yychar += $yyleng
+        $buffer = $buffer[$yyleng,$buffer.length-$yyleng]
+        if ($buffer.length < $bsize) 
+            nbuf = aFile.read($bsize)
+            if (nbuf) 
+                $buffer = $buffer+nbuf
+            end
+            if ($buffer.length == 0) 
+                break
+            end
+        end
+        # begin pattern testing
+        # rules setting
+        # dynamic part 2
+__MATCHES__
+        # end pattern testing
+        if yy_rule == 0
+            $yytext=$buffer[0,1]
+        end
+        $yyleng = $yytext.length;
+        $yytext = $yy_more + $yytext; #for yymore()
+        $yy_buffer = "";
+        # begin actions
+        # dynamic part 3
+__ACTIONS__
+        # end actions
+    end
+    aFile.close()
+end
+
+# main code
+__MAIN__
+def usage
+    puts "Usage: #{$0} <filename>"
+    exit 0
+end
+if __FILE__ == $0
+    if ARGV.length != 1
+        usage
+    end
+    yylex(ARGV[0])
+end

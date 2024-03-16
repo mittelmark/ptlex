@@ -1,0 +1,63 @@
+
+%{
+    my $query_id = "";
+    my $query_length = 0;
+    my $hit_id = "";
+    my $score = -1;
+    my $evalue = -1;
+    my $hit = 0;
+    my $position = -1;
+
+    sub dumpPosition { 
+        print "insert into positions (query_id,query_length,position) values ('$query_id',$query_length,$position);\n";
+    }
+    sub dumpHit {
+        $hit += 1;
+        print "insert into hits (query_id,hit_id,hit,score,evalue) values ('$query_id','$hit_id',$hit,$score,$evalue);\n";    
+    }
+%}
+
+%option buffersize=1024 nodefault main oo
+
+%s QUERY HITS
+
+%%
+
+<*>BLAST[XNP] {
+    $hit = 0;
+    $position = $yychar;
+    BEGIN "QUERY";
+}
+
+<QUERY>Query=[ ][^ \t\n]+ {
+    $query_id = substr($yytext,7,$yyleng-7);
+}
+
+<QUERY>([0-9]+[ ]letters) {
+    $query_length = substr($yytext,0,$yyleng-8);
+    dumpPosition;
+}
+
+<QUERY>Sequences[ ]producing[ ]significant[ ]alignments {
+    BEGIN "HITS";
+}
+
+<HITS>>[^ \t\n]+ {
+    $hit_id = substr($yytext,1,$yyleng-1); 
+}
+
+<HITS>[ ]Score[ ]=[ ]+[0-9]+ {
+    $score = substr($yytext,rindex( $yytext, " "),$yyleng); 
+}
+ 
+<HITS>[ ]Expect[^ ]*[ ]=[ ]+[-\.e0-9]+ {
+    $evalue = substr($yytext,rindex( $yytext, " "),$yyleng); 
+    if ($evalue=~m/^e/){
+        $evalue = "1" . $evalue;
+    }
+    dumpHit;
+}
+
+<*>(.|\n) { # do nothing }
+
+%%

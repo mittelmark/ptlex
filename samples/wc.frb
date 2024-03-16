@@ -1,0 +1,39 @@
+
+%{
+    $nline=0
+    $nword=0
+    $nchar=0
+%}
+
+%option buffersize=1024
+
+%%
+
+
+\n {
+    $nline +=1
+    $nchar +=1
+}
+[^\s\r\n]+ {
+    $nword +=1
+    $nchar += $yytext.length
+}
+
+. {
+    $nchar += 1
+}
+
+%%
+
+def usage
+    puts "Usage: #{$0} <filename>"
+    exit 0
+end
+if __FILE__ == $0
+    if ARGV.length != 1
+        usage
+    end
+    yylex(ARGV[0])
+end
+printf("%7d %7d %7d %s\n" , $nline, $nword, $nchar, ARGV[0])
+

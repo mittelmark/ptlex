@@ -1,0 +1,111 @@
+# !- perl -! 
+# end of TOP
+# object oriented perl code
+package __CLASSNAME__;
+use strict;
+__USERCODE__
+my $buffer;
+my $yytext;
+my $yychar;
+my $yyleng;
+my $yystate = "INITIAL";
+my $yy_more = ""; #buffer for yymore()
+
+# static functions
+#sub ECHO {
+#    print("Echo:" , $yytext,"\n");
+#}
+
+sub yybegin {
+    $yystate = shift;
+}
+
+sub unput{              #adds given characters to the beginning of the input stream
+    $buffer = substr( $buffer,0,$yyleng ) . (shift) . substr( $buffer,$yyleng );
+}
+
+sub yymore{             #adds yytext at the beginning of the new matched text
+    $yy_more = $yytext;
+}
+
+sub yyless{             #writes $num last characters of $yytext back to input stream and modifies $yytext/$yyleng
+    my $num = shift;
+    $yytext = substr( $yytext,$yyleng-$num );
+    $yyleng = $num;
+    $buffer = substr( $buffer,0,$yyleng ) . $yytext . substr( $buffer,$yyleng+$num );
+}
+
+sub new {
+    my $class = shift;
+    my $self = {} ;
+__INIT__
+    bless $self;
+    return $self;
+}
+
+sub yylex {
+    my $self=shift;
+    my $filename=shift;
+__VERBATIM__    
+    $yychar = 0;
+    $yyleng = 0;
+__REGEXES__
+    my $nbuff = "" ;
+    my $nchars = 0 ;
+    $buffer = "";
+    $yytext = "";
+    my $lbuffer;            #lbuffer buffers length of longest matched regex
+    my $yy_rule = 0 ;
+    my $bsize = __BSIZE__ ;
+    if ($filename eq "-") {
+        *FILE=*STDIN;
+    } else {
+        open (FILE, "$filename") or die "Could not open $filename at $!" ;
+    }
+    my $chars = read(FILE, $buffer,$bsize);
+    while (1) {
+        $lbuffer = 0;
+        $yy_rule = 0 ;
+        $yychar += $yyleng ;
+        $buffer = substr($buffer,$yyleng); 
+        #if yyleng = 0 starts from beginning, else from yyleng till end
+        if (length($buffer) < $bsize) {
+            $nchars = read(FILE,$nbuff,$bsize);
+            if ($nchars == 0 and length($buffer) == 0) {
+                last;
+            }
+            $buffer = $buffer . $nbuff ;
+        }
+        # begin pattern testing
+        # rules setting
+        # dynamic part 2
+__MATCHES__
+        # end pattern testing
+        unless($yy_rule){
+            $yytext = substr($buffer,0,1);
+        }
+        $yyleng = length($yytext);
+        $yytext = $yy_more . $yytext;     #for yymore() call
+        $yy_more = "";
+        # begin actions
+        # dynamic part 3
+__ACTIONS__
+        # end actions
+    }
+    close (FILE);
+}
+
+
+package main;
+__MAIN__
+sub usage {
+    print STDERR "Usage: $0 filename\n" ;
+}
+if (!exists $ARGV[0]) {
+    usage();
+    exit 0 ;
+} 
+else {
+    my $yyFlexLexer = new __CLASSNAME__("yyFlexLexer");
+    $yyFlexLexer->yylex($ARGV[0]) ;
+}

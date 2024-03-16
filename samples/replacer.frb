@@ -1,0 +1,12 @@
+
+
+%option buffersize=1024
+
+%%
+
+
+[a-z] {
+    print "x"
+}
+%%
+

@@ -1,0 +1,93 @@
+# Template of scanner !- python -!
+import re
+import sys
+# begin verbatim part 1
+__VERBATIM__
+# end verbatim part 1
+
+yystate = "INITIAL"
+yy_more = "" #buffer for yymore()
+
+yyleng = 0
+buffer = ""
+yytext = ""
+
+
+def yybegin(state):
+    global yystate
+    yystate = state
+
+def unput(chars):              #adds given characters to the beginning of the input stream
+    buffer = buffer[0:yyleng] + chars + buffer[yyleng:]
+
+
+def yymore():             #adds yytext at the beginning of the new matched text
+    yy_more = yytext
+
+
+def yyless(num):             #writes $num last characters of $yytext back to input stream and modifies $yytext/$yyleng
+    yytext = yytext[yyleng-num:]
+    yyleng = num
+    buffer = buffer[0:yyleng] + yytext + buffer[yyleng+num:]
+
+
+def yylex(filename):
+__USERCODE__
+__INIT__
+    # begin patterns
+    # dynamic part 1
+__REGEXES__
+    # end patterns
+    yychar = 0
+    yyleng = 0
+    nbuff = ""
+    nchars = 0
+    buffer = ""
+    yytext = ""
+    lbuffer = 0
+    yy_rule = 0
+    bsize = __BSIZE__
+    try:
+        if (filename == "-"):
+           FILE = sys.stdin 
+        else:
+           FILE = open(filename)
+        buffer = FILE.read(bsize)
+        while (1):
+            lbuffer = 0
+            yy_rule = 0
+            yychar += yyleng
+            buffer = buffer[yyleng:]
+            if(buffer.__len__()<bsize):
+                nbuff = FILE.read(bsize)
+                if(nbuff.__len__() < 1 and buffer.__len__() < 1):
+                    break
+                buffer = buffer + nbuff
+            # begin pattern testing
+            # rules setting
+            # dynamic part 2
+__MATCHES__
+            # end pattern testing
+            if (yy_rule == 0):
+                yytext = buffer[0:1]
+            yyleng = yytext.__len__()
+            yytext = yy_more + yytext #for yymore()
+            yy_buffer = ""
+            # begin actions
+            # dynamic part 3
+__ACTIONS__
+            # end actions
+        FILE.close()
+    except IOError, (errno):
+        print "%s" % (errno)
+
+# begin main
+__MAIN__
+
+def usage():
+    print  "Usage:  " + sys.argv[0] + " <filename> "
+
+if(sys.argv.__len__() == 2):
+    yylex(sys.argv[1])
+else:
+    usage()

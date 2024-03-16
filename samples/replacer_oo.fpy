@@ -1,0 +1,9 @@
+%option buffersize=1024 main oo
+
+%%
+
+[a-z] { 
+    sys.stdout.write('x')
+}
+
+%%

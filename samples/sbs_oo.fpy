@@ -1,0 +1,62 @@
+%top{
+def dumpPosition(query_id,query_length,position) : 
+    print "insert into positions (query_id,query_length,position) values ('"+str(query_id)+"',"+str(query_length)+","+str(position)+");"
+    
+def dumpHit(query_id,hit_id,hit,score,evalue):
+    hit += 1
+    print "insert into hits (query_id,hit_id,hit,score,evalue) values ('"+str(query_id)+"','"+str(hit_id)+"',"+str(hit)+","+str(score)+","+str(evalue)+");"
+    return hit    
+%top}
+
+%{
+        query_id = "";
+        query_length = 0;
+        hit_id = "";
+        score = -1;
+        evalue = -1;
+        hit = 0;
+        position = -1;
+%}
+
+%s HITS QUERY
+%option buffersize=1024
+%%
+
+
+<*>BLAST[XNP] {
+    hit = 0
+    position = self.yychar
+    BEGIN ("QUERY")
+}
+
+<QUERY>Query=[ ][^ \t\n]+ {
+    query_id = self.yytext[7:]
+}
+
+<QUERY>([0-9]+[ ]letters) {
+    query_length = self.yytext[0:self.yyleng-8]
+    dumpPosition(query_id,query_length,position)
+}
+
+<QUERY>Sequences[ ]producing[ ]significant[ ]alignments {
+    BEGIN ("HITS")
+}
+
+<HITS>>[^ \t\n]+ {
+    hit_id = self.yytext[1:self.yyleng] 
+}
+
+<HITS>[ ]Score[ ]=[ ]+[0-9]+ {
+    score = self.yytext[self.yytext.rindex(" "):self.yyleng] 
+}
+ 
+<HITS>[ ]Expect[^ ]*[ ]=[ ]+[-\.e0-9]+ {
+    evalue = self.yytext[self.yytext.rindex(" "):self.yyleng] 
+    if (re.match("^e",evalue)):
+        evalue = "1" + evalue
+    hit = dumpHit(query_id,hit_id,hit,score,evalue)
+}
+
+<*>(.|\n) { continue # do nothing }
+
+%%

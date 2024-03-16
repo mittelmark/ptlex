@@ -1,0 +1,38 @@
+%top{
+my $nline = 0;
+my $nword = 0;
+my $nchar = 0;
+%top}
+
+%option buffersize=1024
+
+%%
+
+\n {
+    $nline++;
+    $nchar++;
+}
+
+[^ \t\n]+ {
+    $nword++;
+    $nchar += $yyleng;
+}
+
+. {
+    $nchar++;
+}
+
+%%
+
+sub usage {
+    print STDERR "Usage: $0 blastfile\n" ;
+}
+if (!exists $ARGV[0]) {
+    usage();
+    exit 0 ;
+} 
+else {
+    yylex $ARGV[0] ;
+    print " $nline $nword $nchar  $ARGV[0]\n";
+}
+

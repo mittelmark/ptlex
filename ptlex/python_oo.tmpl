@@ -1,0 +1,96 @@
+# Template of scanner !- python -!
+import re
+import sys
+__VERBATIM__
+
+class __CLASSNAME__:
+    def __init__(self):
+        # begin of constructor part
+__INIT__
+        # end of constructor part
+        self.yystate = "INITIAL"
+        self.yy_more = ""
+        self.yyleng = 0
+        self.yytext = ""
+        self.yychar = 0
+        self.buffer = ""
+
+    def yylex(self,filename):
+        def yybegin(state):
+            self.yystate = state
+            
+        def unput(chars):              #adds given characters to the beginning of the input stream
+            self.buffer = self.buffer[0:yyleng] + chars + self.buffer[yyleng:]
+
+
+        def yymore():             #adds yytext at the beginning of the new matched text
+            self.yy_more = self.yytext
+
+
+        def yyless(num):             #writes $num last characters of $yytext back to input stream and modifies $yytext/$yyleng
+            self.yytext = self.yytext[yyleng-num:]
+            self.yyleng = num
+            self.buffer = self.buffer[0:self.yyleng] + self.yytext + self.buffer[self.yyleng+num:]
+
+__USERCODE__
+
+        # begin patterns
+        # dynamic part 1
+__REGEXES__
+        # end patterns
+        self.yychar = 0
+        self.yyleng
+        nbuff = ""
+        nchars = 0
+        self.buffer = ""
+        self.yytext = ""
+        self.yy_more = ""
+        lbuffer = 0
+        yy_rule = 0
+        bsize = __BSIZE__
+        try:
+            if (filename == "-"):
+                FILE = sys.stdin 
+            else:
+                FILE = open(filename)
+            self.buffer = FILE.read(bsize)
+            while (1):
+                lbuffer = 0
+                yy_rule = 0
+                self.yychar += self.yyleng
+                self.buffer = self.buffer[self.yyleng:]
+                if(self.buffer.__len__()<bsize):
+                    nbuff = FILE.read(bsize)
+                    if(nbuff.__len__() < 1 and self.buffer.__len__() < 1):
+                        break
+                    self.buffer = self.buffer + nbuff
+                
+                # begin pattern testing
+                # rules setting
+                # dynamic part 2
+__MATCHES__
+                # end pattern testing
+                if (yy_rule == 0):
+                    self.yytext = self.buffer[0:1]
+
+                self.yyleng = self.yytext.__len__()
+                self.yytext = self.yy_more + self.yytext #for yymore()
+                # begin actions
+                # dynamic part 3
+__ACTIONS__
+                # end actions
+                
+            FILE.close()
+        except IOError, (errno):
+            print "%s" % (errno)
+
+__MAIN__
+
+lexer = __CLASSNAME__()
+def usage():
+    print  "Usage:  " + sys.argv[0] + " <filename|-> (- if you use stdin) "
+
+if(sys.argv.__len__() == 2):
+    lexer.yylex(sys.argv[1])
+else:
+    usage()
