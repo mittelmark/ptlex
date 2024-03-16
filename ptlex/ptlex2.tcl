@@ -1,23 +1,18 @@
 ##############################################################################
 #
-#  			Copyright 2009 Dr. Detlef Groth.
-#			      All Rights Reserved
-#
-#
-#  System        : 
-#  Module        : 
+#  Copyright     : 2009-2024 Detlef Groth
+#                  2009      Stefan Müller  
 #  Object Name   : $RCSfile: ptlex2.tcl,v $
-#  Revision      : $Revision: 1.26 $
-#  Date          : $Date: 2009/08/25 09:02:04 $
-#  Author        : $Author: dgroth $
-#  Created By    : Dr. Detlef Groth
+#  Author        : Detlef Groth
 #  Created       : Thu May 28 10:02:08 2009
-#  Last Modified : <240316.1011>
+#  Last Modified : <240316.1022>
 #
-#  Description	
+#  Description	 : Scanner generator for Tcl, Python, Perl and Ruby
 #
-#  Notes
-#
+#  History:       2024-03-16
+#                 Support for Python 3
+#                 Building app with tpack
+#                 Project moved from Sourceforge to Github
 #  History:       $Log: ptlex2.tcl,v $
 #  History:       Revision 1.26  2009/08/25 09:02:04  dgroth
 #  History:       addingb license information and revision information
@@ -97,17 +92,12 @@
 #	
 ##############################################################################
 #
-#  Copyright (c) 2009 Dr. Detlef Groth.
+#  Copyright (c) 2009-2024 Detlef Groth, 2009 Stefan Müller
+#  License:      BSD-3 (see below)
 # 
-#  All Rights Reserved.
-# 
-#  This  document  may  not, in  whole  or in  part, be  copied,  photocopied,
-#  reproduced,  translated,  or  reduced to any  electronic  medium or machine
-#  readable form without prior written consent from Dr. Detlef Groth.
-#
 ##############################################################################
-package provide app-ptlex 2.0
-set version 2.0
+package provide app-ptlex 2.0.0
+set version 2.0.0
 regsub Date: $version "" version
 regsub -all {\$} $version "" version
 array set options [list]
@@ -876,6 +866,7 @@ if {[llength $argv] == 0} {
         exit 0
     }
     array set options [array get cdlarg]
+    set options(lang) [string tolower $options(lang)]
     if {$options(outfile) eq ""} {
         if {$options(lang) eq "tcl"} {
             set options(outfile) "[file rootname $options(flexfile)].tcl"
@@ -931,5 +922,5 @@ if {[llength $argv] == 0} {
     set out [open $options(outfile) w 0600]
     puts $out "$scanner"
     close $out
-    puts stderr "Success: Language=$options(lang)  Script-file=$options(outfile) generated!"
+    puts "Success: Language=$options(lang)  Script-file=$options(outfile) generated!"
 }
