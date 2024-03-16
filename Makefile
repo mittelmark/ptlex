@@ -46,3 +46,8 @@ sbs-samples:
 	tclsh ptlex/ptlex2.tcl --lang python samples/sbs.fpy
 	tclsh ptlex/ptlex2.tcl --lang ruby samples/sbs.frb
 	tclsh ptlex/ptlex2.tcl --lang perl samples/sbs.fpl
+app:
+	cp ptlex/*.tcl ptlex.vfs/lib/app-ptlex/
+	cp ptlex/*.tmpl ptlex.vfs/lib/app-ptlex/
+	tpack ptlex.tapp
+	

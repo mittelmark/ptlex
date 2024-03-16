@@ -12,7 +12,7 @@
 #  Author        : $Author: dgroth $
 #  Created By    : Dr. Detlef Groth
 #  Created       : Thu May 28 10:02:08 2009
-#  Last Modified : <090825.1100>
+#  Last Modified : <240316.1011>
 #
 #  Description	
 #
@@ -106,8 +106,8 @@
 #  readable form without prior written consent from Dr. Detlef Groth.
 #
 ##############################################################################
-package provide app-ptlex2 1.0
-set version {$Revision: 1.26 $ $Date: 2009/08/25 09:02:04 $}
+package provide app-ptlex 2.0
+set version 2.0
 regsub Date: $version "" version
 regsub -all {\$} $version "" version
 array set options [list]
@@ -795,13 +795,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 proc HelpMessage {} {
     puts {
 This is ptlex - A Tcl based flexlike scanner generator.
+
 $Revision: 1.26 $
 
 How to use ptlex:
 
-tclkit-runtime ptlex.kit [options] flexfile outfile
+ptlex [options] FLEXFILE OUTFILE
     
 Valid options are:
+
 -+                   Object Oriented scanner (Tcl, Perl and Python)
 --buffersize num     Set buffersize of scanner to num
 --flexfile file      Set flexfile
@@ -826,7 +828,7 @@ source [file join [file dirname [info script]] getopt.tcl]
 set cdlarg(outfile) ""
 set cdlarg(flexfile) ""
 getopt flag arg $argv {
-    -V - -v - --version { puts "[info script] $version" ; exit 0 }
+    -V - -v - --version { puts "$version" ; exit 0 }
     -h? - --help { HelpMessage ; exit 0 ; }
     -+ - --oo { set cdlarg(oo) 1 }
     --buffersize: { set cdlarg($flag) $arg }
