@@ -2,7 +2,7 @@
 
 ## NAME
 
-__ptlex__: Lexer generator written in Tcl for Tcl, Python, Perl and Ruby
+__ptlex__: Lexer generator written in Tcl for Tcl, Python, Perl, R and Ruby
 
 ## SYNOPSIS
 
@@ -60,7 +60,7 @@ yylex [lindex $argv 0]
 puts [format "%7d %7d %7d %s" $nline $nword $nchar [lindex $argv 0]]
 ```
 
-This flex-like input file can be translated int a program with the following programm call:
+This flex-like input file can be translated into a program with the following programm call:
 
 ```
 ptlex --lang Tcl wc.ftl wc.tcl
@@ -83,6 +83,20 @@ On Unix systems or on Windows with Msys:
 - download the file `ptlex.tapp`
 - make it executable  using `chmod`
 - copy it to a folder belonging to your `PATH` variable
+
+## SUPPORTED LANGUAGES
+
+Scanner generation is done using the Tcl programming language. Scanners can be
+generated for the programming languages Tcl, Perl, Python, R and Ruby. For the
+first three as well in an OO-style. See the following summary table.
+
+| Programming Language | Functional-Style | OO-style   | Samples      |
+|:--------------------:|:----------------:|:----------:|:------------:|
+| Perl                 | yes              | yes        | wc, rep, sbs |
+| Python 3             | yes              | yes        | wc, rep, sbs |
+| R                    | yes              | no         | wc, rep      |
+| Ruby                 | yes              | no         | wc, rep, sbs |
+| Tcl                  | yes              | yes (itcl) | wc, rep, sbs |
 
 ## LICENSE
 
