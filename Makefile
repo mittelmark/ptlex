@@ -10,6 +10,8 @@ wc-samples:
 	ruby samples/wc.rb samples/wc.ftl
 	tclsh ptlex/ptlex2.tcl --lang perl samples/wc.fpl
 	perl samples/wc.pl samples/wc.ftl
+	tclsh ptlex/ptlex2.tcl --lang r samples/wc.fr
+	Rscript samples/wc.r samples/wc.ftl
 wc-oo-samples:
 	tclsh ptlex/ptlex2.tcl --lang tcl -+  samples/wc_oo.ftl
 	tclsh samples/wc_oo.tcl samples/wc.ftl
@@ -27,20 +29,13 @@ rep-samples:
 	ruby samples/replacer.rb samples/replacer.ftl
 	tclsh ptlex/ptlex2.tcl --lang perl samples/replacer.fpl
 	perl samples/replacer.pl samples/replacer.ftl
+	tclsh ptlex/ptlex2.tcl --lang r samples/replacer.fr
+	Rscript samples/replacer.r samples/replacer.ftl
 rep-oo-samples:
 	tclsh ptlex/ptlex2.tcl --lang tcl -+  samples/replacer_oo.ftl
 	tclsh samples/replacer_oo.tcl samples/replacer.ftl
 	tclsh ptlex/ptlex2.tcl --lang python -+ samples/replacer_oo.fpy
 	python3 samples/replacer_oo.py samples/replacer.ftl
-wc-samples:
-	tclsh ptlex/ptlex2.tcl --lang tcl samples/wc.ftl
-	tclsh samples/wc.tcl samples/wc.ftl
-	tclsh ptlex/ptlex2.tcl --lang python samples/wc.fpy
-	python3 samples/wc.py samples/wc.ftl
-	tclsh ptlex/ptlex2.tcl --lang ruby samples/wc.frb
-	ruby samples/wc.rb samples/wc.ftl
-	tclsh ptlex/ptlex2.tcl --lang perl samples/wc.fpl
-	perl samples/wc.pl samples/wc.ftl
 sbs-samples:
 	tclsh ptlex/ptlex2.tcl --lang tcl samples/sbs.ftl
 	tclsh ptlex/ptlex2.tcl --lang python samples/sbs.fpy
