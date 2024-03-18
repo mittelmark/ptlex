@@ -5,7 +5,7 @@
 #  Object Name   : $RCSfile: ptlex2.tcl,v $
 #  Author        : Detlef Groth
 #  Created       : Thu May 28 10:02:08 2009
-#  Last Modified : <240316.1022>
+#  Last Modified : <240318.0916>
 #
 #  Description	 : Scanner generator for Tcl, Python, Perl and Ruby
 #
@@ -275,10 +275,16 @@ proc createRegexes {} {
         incr indent 4
     }
     set nocase ""
+    if {$options(lang) == "r"} {
+        set nocase "FALSE"
+    }
     if {$options(caseinsensitive)} {
         set nocase "i"
         if {$options(lang) eq "python"} {
             set nocase ", re.IGNORECASE"
+        } 
+        if {$options(lang) eq "r"} {
+            set nocase "TRUE"
         }
     }
 
@@ -288,6 +294,8 @@ proc createRegexes {} {
         append res [string repeat " " $indent]
         if {$options(lang) eq "perl"} {
             append res "my \$reg[incr x] = qr/^$reg/$nocase;\n"
+        } elseif {$options(lang) eq "r"} {
+            append res "reg[incr x] = c('^$reg',$nocase)\n"
         } elseif {$options(lang) eq "ruby"} {
             append res "\$reg[incr x] = /\\A$reg/$nocase;\n"
         } elseif {$options(lang) eq "python"} {
@@ -623,6 +631,85 @@ proc createMatchingPerl {} {
     }
 }
 
+proc createMatchingR {} {
+    global sstates mstates regexes
+    global xstates
+    global options
+    set indent 8
+    if {$options(oo)} {
+        incr indent 4
+    }
+    set x 0
+    array set rgx [list]
+    set res ""
+    set tmpl {  
+        rx=regexpr(reg$reg[1],buffer,ignore.case=$reg[2])
+        match=substr(buffer,rx[[1]],rx[[1]]+attr(rx,'match.length')-1)
+        if(length(match)>lbuffer) {
+           yy_rule = $reg;
+           yytext = match;
+           lbuffer = length(yytext);
+        }
+ }
+    set tmpl [string range $tmpl 0 end-1]
+    foreach state $mstates {
+        incr x
+        foreach st $state {
+            if {[info exists rgx($st)]} {
+                lappend rgx($st) $x
+            } else {
+                set rgx($st) [list $x]
+            }
+        }
+    }
+    if {[llength $sstates] > 1 || [llength $xstates] > 0} {
+        set y 0
+        set tmpl [regsub -all {\n } $tmpl "\n[string repeat { } $indent]"]
+        array set done [list]
+        foreach state [concat $sstates $xstates] {
+            if {[incr y] == 1} {
+                append res [string repeat " " $indent]
+            } else {
+                append res " else "
+            }
+            append res "if (yystate eq \"state\") {\n"
+            if {[llength $rgx($state)] > 0} {
+                set x 0
+                incr indent 4
+                foreach reg $rgx($state) {
+                    if {[info exists done($reg,$state)]} {
+                        continue
+                    } else {
+                        set done($reg,$state) 1
+                    }
+                    ## TODO: 
+                    append res "\n[string repeat { } $indent]if (grepl(reg$reg\[1\],x=buffer,ignore.case=reg\$reg\[2\])) {"
+                    append res [subst -nocommands $tmpl] 
+                    append res [string repeat " " $indent]
+                    append res "}"
+                }
+                incr indent -4
+                append res "[string repeat { } $indent]\n" 
+                
+            }
+            append res "[string repeat { } $indent]}\n"
+        }
+        append res "[string repeat { } $indent]\n" 
+    } else {
+        # no states
+        #incr indent -4
+        set x 0
+        set tmpl [regsub -all {\n } $tmpl "\n[string repeat { } $indent]"]
+        foreach reg $rgx(INITIAL) {
+            append res "[string repeat { } $indent]if (grepl(reg$reg\[1\],x=buffer,ignore.case=reg$reg\[2\])) {"
+            append res [subst -nocommands $tmpl]
+            append res "[string repeat { } $indent]}\n"
+        }          
+        append res "[string repeat { } $indent]\n" 
+        
+    }
+}
+
 proc createActions {actions} {
     global options
     set indent 8
@@ -640,6 +727,8 @@ proc createActions {actions} {
         } else {
             if {$options(lang) eq "python"} {
                 append res "el"
+            } elseif {$options(lang) eq "r"} {
+                append res "else "
             } else {
                 append res "els"
             }
@@ -650,6 +739,8 @@ proc createActions {actions} {
             append res "if (yy_rule == $x):\n"
         } elseif {$options(lang) eq "perl"} {
             append res "if (\$yy_rule == $x) \{\n"
+        } elseif {$options(lang) eq "r"} {
+            append res "if (yy_rule == $x) \{\n"
         }
         foreach line [split $action "\n"] {
             append res [string repeat " " $indent]
@@ -658,7 +749,10 @@ proc createActions {actions} {
         append res "[string repeat { } $indent]"
         if {$options(lang) eq "perl"} {
             append res "\} "
+        } elseif {$options(lang) eq "r"} {
+            append res "\} "
         }
+
     }
     if {!$options(nodefault)} {
         if {$options(lang) eq "ruby"} {
@@ -673,7 +767,9 @@ proc createActions {actions} {
             }
         } elseif {$options(lang) eq "perl"} {
             append res "else { print \$yytext ; }\n"
-        }
+        } elseif {$options(lang) eq "r"} {
+            append res "else { cat(yytext) ; }\n"
+        } 
     }
     if {$options(lang) eq "ruby"} {
         append res "[string repeat { } $indent]end"
@@ -784,9 +880,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 proc HelpMessage {} {
     puts {
-This is ptlex - A Tcl based flexlike scanner generator.
+ptlex - Tcl based flexlike scanner generator for Tcl, Python, Perl and Ruby.
 
-$Revision: 1.26 $
+Version 2.0.0
 
 How to use ptlex:
 
@@ -876,6 +972,8 @@ if {[llength $argv] == 0} {
             set options(outfile) "[file rootname $options(flexfile)].pl"
         } elseif {$options(lang) eq "python"} {
             set options(outfile) "[file rootname $options(flexfile)].py"
+        } elseif {$options(lang) eq "r"} {
+            set options(outfile) "[file rootname $options(flexfile)].r"
         } else {
             puts stderr "ERROR: language $options(lang) not implemented!\n"
             exit 0
@@ -900,6 +998,10 @@ if {[llength $argv] == 0} {
     } elseif {$options(lang) eq "python"} {
         set regions(regexes) [createRegexes]
         set regions(matches) [createMatchingPython]
+        set regions(actions) [createActions $mactions]
+    } elseif {$options(lang) eq "r"} {
+        set regions(regexes) [createRegexes]
+        set regions(matches) [createMatchingR]
         set regions(actions) [createActions $mactions]
     } 
     if {$options(skeleton_file) eq ""} {

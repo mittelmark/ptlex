@@ -1,0 +1,110 @@
+# Template of scanner !- R -!
+
+# begin verbatim part 1
+__VERBATIM__
+# end verbatim part 1
+
+yystate = "INITIAL"
+yy_more = "" #buffer for yymore()
+
+yyleng = 0
+buffer = ""
+yytext = ""
+
+
+yybegin <- function (state) {
+    yystate <<- state
+}
+
+# adds given characters to the beginning of the input stream
+unput <- function (chars) {
+    buffer <<- c(chars,buffer)
+}
+
+
+# adds yytext at the beginning of the new matched text
+yymore <- function () {
+    yy_more <<- yytext
+}   
+
+
+# writes $num last characters of $yytext back to input stream and modifies $yytext/$yyleng
+yless <- function (num) {
+    yytext <<- substr(yytext,yyleng-num+1,length(yytext))
+    yyleng <<- num
+    buffer <<- paste(substr(buffer,1,yyleng+1),yytext,substr(buffer,yyleng+num+1,length(buffer)),sep="")
+}
+
+yylex <- function (filename) {
+__USERCODE__
+__INIT__
+    # begin patterns
+    # dynamic part 1
+__REGEXES__
+    # end patterns
+    yychar = 0
+    yyleng = 0
+    nbuff = ""
+    nchars = 0
+    buffer = ""
+    yytext = ""
+    lbuffer = 0
+    yy_rule = 0
+    bsize = __BSIZE__
+    if (filename == "-") {
+         fin=file('stdin',"rb")
+    } else {
+         fin=file(filename,"rb")
+    } 
+    buffer = readChar(fin,bsize)
+    while (TRUE) {
+        lbuffer = 0
+        yy_rule = 0
+        yychar = yychar+yyleng
+        buffer = substr(buffer,yyleng+1,nchar(buffer))
+        if(nchar(buffer)<bsize) {
+            nbuff = readChar(fin,bsize)
+            if (length(nbuff)>0) {
+                buffer = paste(buffer,nbuff,sep="")
+            } else if (nchar(buffer) == 0) {
+                break
+            }
+        }
+        # begin pattern testing
+        # rules setting
+        # dynamic part 2
+__MATCHES__
+        # end pattern testing
+        if (yy_rule == 0) {
+             yytext = substr(buffer,1,1)
+        }
+        yyleng = nchar(yytext)
+        yytext = paste(yy_more,yytext,sep="")
+        yy_buffer = ""
+        # begin actions
+        # dynamic part 3
+__ACTIONS__
+        # end actions
+    }
+    close(fin)
+}
+# begin main
+__MAIN__
+
+usage <- function (scriptfile,argv) {
+    print(paste("Usage:  ",scriptfile, " <filename> "))
+}
+
+if (sys.nframe() == 0L && !interactive()) {
+    #main(commandArgs(trailingOnly=TRUE))
+    argv=commandArgs()
+    idx=grepl("^--file",argv)
+    scriptfile=substr(argv[idx],8,nchar(argv[idx]))
+    print(scriptfile)
+    argv=commandArgs(trailingOnly=TRUE)
+    if (length(argv)==1 & file.exists(argv[1])) {
+        yylex(argv[1])
+    } else {
+        usage(scriptfile,argv)
+    }
+}

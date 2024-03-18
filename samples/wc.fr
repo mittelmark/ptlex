@@ -1,0 +1,39 @@
+%top{
+nline = 0;
+nword = 0;
+nchar = 0;
+%top}
+
+%option buffersize=1024
+
+%%
+
+\n {
+    nline <<- nline + 1
+    nchar <<- nchar + 1
+}
+
+[^ \t\n]+ {
+    nword <<- nword + 1
+    nchar <<- nchar + yyleng
+}
+
+. {
+    nchar <<- nchar + 1
+}
+
+%%
+
+usage <- function () {
+    print("wc.r filename\n") ;
+}
+argv=commandArgs(trailingOnly=TRUE)
+if (length(argv)!= 1) {
+    usage()
+} else if (!file.exists(argv[1])) {
+    usage()
+    print(paste("Error: File ",filename,"does  not exists!"))
+} else {
+    yylex(argv[1])
+    cat(sprintf("%i\t%i\t%i\t %s\n",nline,nword,nchar,argv[1]))
+}
