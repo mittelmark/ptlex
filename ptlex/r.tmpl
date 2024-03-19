@@ -42,14 +42,14 @@ __INIT__
     # dynamic part 1
 __REGEXES__
     # end patterns
-    yychar = 0
-    yyleng = 0
+    yychar <<- 0
+    yyleng <<- 0
     nbuff = ""
     nchars = 0
     buffer = ""
-    yytext = ""
+    yytext <<- ""
     lbuffer = 0
-    yy_rule = 0
+    yy_rule <<- 0
     bsize = __BSIZE__
     if (filename == "-") {
          fin=file('stdin',"rb")
@@ -59,8 +59,8 @@ __REGEXES__
     buffer = readChar(fin,bsize)
     while (TRUE) {
         lbuffer = 0
-        yy_rule = 0
-        yychar = yychar+yyleng
+        yy_rule <<- 0
+        yychar <<- yychar+yyleng
         buffer = substr(buffer,yyleng+1,nchar(buffer))
         if(nchar(buffer)<bsize) {
             nbuff = readChar(fin,bsize)
@@ -76,11 +76,11 @@ __REGEXES__
 __MATCHES__
         # end pattern testing
         if (yy_rule == 0) {
-             yytext = substr(buffer,1,1)
+             yytext <<- substr(buffer,1,1)
         }
-        yyleng = nchar(yytext)
-        yytext = paste(yy_more,yytext,sep="")
-        yy_buffer = ""
+        yyleng <<- nchar(yytext)
+        yytext <<- paste(yy_more,yytext,sep="")
+        yy_buffer <<- ""
         # begin actions
         # dynamic part 3
 __ACTIONS__
