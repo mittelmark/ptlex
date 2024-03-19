@@ -98,6 +98,17 @@ first three as well in an OO-style. See the following summary table.
 | Ruby                 | yes              | no         | wc, rep, sbs |
 | Tcl                  | yes              | yes (itcl) | wc, rep, sbs |
 
+## OTHER LEXERS
+
+| Lexer                | Programming Language | Link                                  |
+|:---------------------|:---------------------|:--------------------------------------|
+| Flex                 | C/C++                | https://github.com/westes/flex        |
+| Gplex                | C#                   | https://github.com/k-john-gough/gplex | 
+| Jflex                | Java                 | https://github.com/jflex-de/jflex     |
+| Tply                 | Pascal               | https://github.com/martok/fpc-tply    |
+| Fickle / Ifickle     | Tcl                  | https://github.com/devnull42/fickle/tree/8977634fcd738fc4d05615c1fe16aceb95f39014 |
+| Yeti                 | Tcl                  | https://github.com/mittelmark/yeti    |
+
 ## LICENSE
 
 ```
